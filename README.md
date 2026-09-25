@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PaperTrace 📝
 
-## Getting Started
+> A lightweight, account-free, key-based note-taking web application with a paper notebook vibe. Built with Next.js, Tiptap, Neon PostgreSQL, and Tailwind CSS.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🎨 Theme & Vibe
+
+PaperTrace is designed to evoke a warm, tactile paper journal—like writing on heavy cream-colored fountain pen paper inside a physical notebook. It avoids harsh digital blacks and cold blue-grays in favor of warm cream canvas backgrounds, subtle paper borders, and classical serif typography for document titles.
+
+---
+
+## 🚀 Key Features
+
+- **No Accounts Required:** Notes are accessed strictly via custom or auto-generated **Keys**.
+- **Two-Input Home Screen:** Explicit distinction between opening an existing key and creating a new one.
+- **Rich Text WYSIWYG Editor:** Powered by **Tiptap** with full support for headings, lists, code blocks, and blockquotes.
+- **PIN Protection:** Optional 4-digit PIN lock using server-side `bcrypt` hashing.
+- **Self-Destruct & TTL:** Selectable expiration periods (1 day, 7 days, 30 days, or **Burn-on-Read**).
+- **Auto-Save with Debouncing:** Automatic saving 1.5 seconds after editing stops.
+- **Dual-Token Sharing:** Generate separate **Read-Only** (`/share/v/[token]`) or **Editable** (`/share/e/[token]`) links with optional QR code generation.
+- **Word & Reading Metadata:** Real-time character count, word count, and estimated reading time.
+- **Raw / Preview Mode:** Instant toggle between rich rendered prose and raw Markdown/HTML.
+- **Multi-Format Client-Side Export:** One-click download as `.txt`, `.md`, or `.html` directly in the browser.
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+| Layer                         | Technology                       | Purpose                                                       |
+| ----------------------------- | -------------------------------- | ------------------------------------------------------------- |
+| **Framework**                 | Next.js 14 (App Router)          | React framework with integrated serverless API routes         |
+| **Styling**                   | Tailwind CSS v3                  | Utility-first CSS configured with custom paper tokens         |
+| **Editor**                    | Tiptap (ProseMirror)             | Headless WYSIWYG editor framework                             |
+| **Database**                  | Neon Serverless PostgreSQL       | Low-latency PostgreSQL DB hosted on serverless infrastructure |
+| **Authentication**            | Custom PIN (bcrypt)              | Hashed numeric PIN protection per note                        |
+| **Export & Client Utilities** | Native Blob API / `qrcode.react` | Client-side file generation and QR codes                      |
+
+---
+
+## 🚦 Getting Started Locally
+
+### 1. Prerequisites
+
+- Node.js `18.x` or higher
+- npm, pnpm, or yarn
+- A free [Neon PostgreSQL](https://neon.tech) account
+
+### 2. Environment Setup
+
+Create a `.env.local` file in the project root:
+
+```env
+DATABASE_URL="postgresql://user:password@ep-cool-sample-123456.us-east-2.aws.neon.tech/neondb?sslmode=require"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Database Initialization
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run the SQL script inside `db/schema.sql` inside your Neon SQL Console to set up tables and indexes.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Install & Run
 
-## Learn More
+```bash
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📂 Project Structure
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+├── app/
+│   ├── layout.tsx                # Root layout with warm cream theme wrappers
+│   ├── page.tsx                  # Home screen (Two-Input key access layout)
+│   ├── note/
+│   │   └── [key]/page.tsx        # Main Tiptap editor interface & toolbar
+│   ├── share/
+│   │   ├── v/[token]/page.tsx    # Read-only shared view
+│   │   └── e/[token]/page.tsx    # Editable shared view
+│   └── api/
+│       └── notes/                # Serverless API routes (CRUD, PIN, Share)
+├── components/
+│   ├── editor/                   # Tiptap toolbar, status bar, raw toggle
+│   ├── home/                     # Open key form, Create key form
+│   └── modals/                   # PIN prompt, Share modal, TTL dropdown
+├── db/
+│   ├── schema.sql                # Neon PostgreSQL schema definition
+│   └── index.ts                  # @neondatabase/serverless client connection
+├── DESIGN.md                     # Design specification & system tokens
+└── PRD.md                        # Product Requirements Document
+```
