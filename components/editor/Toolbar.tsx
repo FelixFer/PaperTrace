@@ -48,15 +48,14 @@ function ToolbarButton({
         onClick={onClick}
         disabled={disabled}
         aria-label={label}
-        className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
-          isActive
+        className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${isActive
             ? "bg-primary text-on-primary"
             : "text-ink-muted hover:bg-canvas-soft hover:text-ink"
-        } ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+          } ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
       >
         {children}
       </button>
-      <span className="pointer-events-none absolute left-1/2 top-full z-30 mt-2 max-w-[200px] -translate-x-1/2 rounded-md bg-ink px-2.5 py-1 text-center text-xs font-medium text-on-primary opacity-0 shadow-elevation-1 transition-opacity duration-150 group-hover:opacity-100">
+      <span className="pointer-events-none absolute left-1/2 top-full z-30 mt-2 max-w-50 -translate-x-1/2 rounded-md bg-ink px-2.5 py-1 text-center text-xs font-medium text-on-primary opacity-0 shadow-elevation-1 transition-opacity duration-150 group-hover:opacity-100">
         {label}
         {shortcut && (
           <span className="ml-1.5 text-ink-faint">{shortcut}</span>

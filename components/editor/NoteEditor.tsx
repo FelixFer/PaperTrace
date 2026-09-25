@@ -42,6 +42,10 @@ export function NoteEditor({ note, requiresPin = false }: NoteEditorProps) {
   const [pinError, setPinError] = useState("");
   const [pinLoading, setPinLoading] = useState(false);
   const burnedRef = useRef(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const [headerH, setHeaderH] = useState(56);
+  const [toolbarTop, setToolbarTop] = useState(56);
 
   const editorRef = useRef<{
     getHtml: () => string;
@@ -173,6 +177,24 @@ export function NoteEditor({ note, requiresPin = false }: NoteEditorProps) {
     }
   }
 
+  // Keep sticky offsets in sync: header height + settings panel height.
+  useEffect(() => {
+    const update = () => {
+      const h = headerRef.current?.offsetHeight ?? 56;
+      setHeaderH(h);
+      setToolbarTop(h + (showSettings ? (settingsRef.current?.offsetHeight ?? 0) : 0));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    if (headerRef.current) ro.observe(headerRef.current);
+    if (settingsRef.current) ro.observe(settingsRef.current);
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [showSettings]);
+
   // Burn-on-read: delete when the user leaves/closes the page.
   const burnNote = useCallback(() => {
     if (burnedRef.current || !noteData.note_key) return;
@@ -214,9 +236,12 @@ export function NoteEditor({ note, requiresPin = false }: NoteEditorProps) {
   }, [noteData.ttl_mode, burnNote]);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-canvas-soft">
+    <div className="min-h-screen bg-canvas-soft">
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-hairline bg-surface/80 backdrop-blur-sm">
+      <header
+        ref={headerRef}
+        className="sticky top-0 z-30 border-b border-hairline bg-surface/80 backdrop-blur-sm"
+      >
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <button
@@ -261,42 +286,59 @@ export function NoteEditor({ note, requiresPin = false }: NoteEditorProps) {
 
       {/* Settings panel */}
       {showSettings && (
-        <div className="border-b border-hairline bg-surface">
-          <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-4 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <Shield size={14} className="text-ink-muted" />
-              <span className="text-sm text-ink-muted">PIN:</span>
-              {noteData.is_protected ? (
-                <span className="text-sm text-accent-green">Protected</span>
-              ) : (
-                <button
-                  onClick={() => setShowPinModal(true)}
-                  className="text-sm text-primary hover:underline"
-                >
-                  Set PIN
-                </button>
-              )}
+        <div
+          ref={settingsRef}
+          style={{ top: `${headerH}px` }}
+          className="sticky z-20 border-b border-hairline bg-surface"
+        >
+          <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-3 flex-col md:flex-row">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Shield size={14} className="text-ink-muted" />
+                <span className="text-sm text-ink-muted">PIN:</span>
+                {noteData.is_protected ? (
+                  <span className="text-sm text-accent-green">Protected</span>
+                ) : (
+                  <button
+                    onClick={() => setShowPinModal(true)}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Set PIN
+                  </button>
+                )}
+              </div>
+
+              <div className="h-4 w-px bg-hairline" />
+
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-ink-muted">Expires:</span>
+                <TtlDropdown
+                  currentMode={noteData.ttl_mode}
+                  onUpdate={handleTtlUpdate}
+                />
+              </div>
             </div>
 
-            <div className="h-4 w-px bg-hairline" />
+            <div className="hidden md:block h-4 w-px bg-hairline" />
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-ink-muted">Expires:</span>
-              <TtlDropdown
-                currentMode={noteData.ttl_mode}
-                onUpdate={handleTtlUpdate}
+            <div className="flex items-center justify-end gap-4">
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="flex items-center gap-1 text-sm text-primary hover:underline"
+              >
+                <Share2 size={14} />
+                Share
+              </button>
+
+              <div className="h-4 w-px bg-hairline" />
+
+              <ExportMenu
+                noteKey={noteData.note_key}
+                getText={() => editorRef.current?.getText() || ""}
+                getHtml={() => editorRef.current?.getHtml() || ""}
+                getMarkdown={() => editorRef.current?.getMd() || ""}
               />
             </div>
-
-            <div className="h-4 w-px bg-hairline" />
-
-            <button
-              onClick={() => setShowShareModal(true)}
-              className="flex items-center gap-1 text-sm text-primary hover:underline"
-            >
-              <Share2 size={14} />
-              Share
-            </button>
           </div>
         </div>
       )}
@@ -306,7 +348,7 @@ export function NoteEditor({ note, requiresPin = false }: NoteEditorProps) {
         <div className="border-b border-red-200 bg-red-50 px-4 py-2">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-2 text-sm text-red-700">
             <Flame size={14} className="shrink-0" />
-            <span className="break-words">
+            <span className="wrap-break-word">
               Burn-on-read: this note will be destroyed when you close or leave
               this page.
             </span>
@@ -319,6 +361,7 @@ export function NoteEditor({ note, requiresPin = false }: NoteEditorProps) {
         {unlocked ? (
           <TiptapEditor
             initialContent={noteData.content_html}
+            stickyTop={toolbarTop}
             onUpdate={handleEditorUpdate}
             onClear={handleClear}
           />
@@ -353,17 +396,6 @@ export function NoteEditor({ note, requiresPin = false }: NoteEditorProps) {
                 {pinLoading ? "Verifying..." : "Unlock"}
               </button>
             </form>
-          </div>
-        )}
-
-        {unlocked && (
-          <div className="mt-4 flex justify-end">
-            <ExportMenu
-              noteKey={noteData.note_key}
-              getText={() => editorRef.current?.getText() || ""}
-              getHtml={() => editorRef.current?.getHtml() || ""}
-              getMarkdown={() => editorRef.current?.getMd() || ""}
-            />
           </div>
         )}
       </main>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Download, FileText, FileCode, FileType } from "lucide-react";
 import { downloadNoteFile } from "@/utils/export";
 
@@ -17,6 +17,7 @@ export function ExportMenu({
   getHtml,
   getMarkdown,
 }: ExportMenuProps) {
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
 
   function exportFile(format: "txt" | "md" | "html") {
@@ -38,15 +39,18 @@ export function ExportMenu({
   return (
     <div className="relative">
       <button
+        ref={triggerRef}
         onClick={() => setOpen(!open)}
-        className="flex min-h-[44px] items-center gap-2 rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink transition-colors hover:bg-canvas-soft"
+        className="flex min-h-11 items-center gap-2 rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink transition-colors hover:bg-canvas-soft"
       >
         <Download size={14} />
         Export
       </button>
 
       {open && (
-        <div className="absolute right-0 z-10 mt-1 w-48 max-w-[calc(100vw-2rem)] rounded-lg border border-hairline bg-surface py-1 shadow-elevation-2">
+        <div
+          className={`absolute top-full z-50 mt-1 w-48 max-w-[calc(100vw-2rem)] rounded-lg border border-hairline bg-surface py-1 shadow-elevation-2 right-0`}
+        >
           <button
             onClick={() => exportFile("txt")}
             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-ink hover:bg-canvas-soft"

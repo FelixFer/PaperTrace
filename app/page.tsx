@@ -3,11 +3,11 @@ import { CreateKeyForm } from "@/components/home/CreateKeyForm";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center overflow-x-hidden bg-canvas-soft px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-canvas-soft p-4">
       <div style={{ width: "100%", maxWidth: "420px" }}>
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-3xl font-bold text-ink tracking-tight">
-            PaperTrace
+            Paper Trace
           </h1>
           <p className="text-sm text-ink-muted">
             A lightweight, key-based note-taking app.

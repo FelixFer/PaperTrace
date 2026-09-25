@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Clock, ChevronDown, Trash2 } from "lucide-react";
 
 const TTL_OPTIONS = [
@@ -17,6 +17,7 @@ interface TtlDropdownProps {
 }
 
 export function TtlDropdown({ currentMode, onUpdate }: TtlDropdownProps) {
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -30,9 +31,10 @@ export function TtlDropdown({ currentMode, onUpdate }: TtlDropdownProps) {
   return (
     <div className="relative">
       <button
+        ref={triggerRef}
         onClick={() => setOpen(!open)}
         disabled={loading}
-        className="flex min-h-[44px] items-center gap-2 rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink transition-colors hover:bg-canvas-soft disabled:opacity-50"
+        className="flex min-h-11 items-center gap-2 rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink transition-colors hover:bg-canvas-soft disabled:opacity-50"
       >
         <Clock size={14} className="text-ink-muted" />
         <span>
@@ -42,16 +44,17 @@ export function TtlDropdown({ currentMode, onUpdate }: TtlDropdownProps) {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-10 mt-1 w-56 max-w-[calc(100vw-2rem)] rounded-lg border border-hairline bg-surface py-1 shadow-elevation-2">
+        <div
+          className={`absolute top-full z-50 mt-1 w-56 max-w-[calc(100vw-2rem)] rounded-lg border border-hairline bg-surface py-1 shadow-elevation-2 right-0`}
+        >
           {TTL_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               onClick={() => handleSelect(opt.value)}
-              className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-canvas-soft ${
-                currentMode === opt.value
-                  ? "font-medium text-primary"
-                  : "text-ink"
-              } ${opt.value === "burn_on_read" ? "text-red-600" : ""}`}
+              className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-canvas-soft ${currentMode === opt.value
+                ? "font-medium text-primary"
+                : "text-ink"
+                } ${opt.value === "burn_on_read" ? "text-red-600" : ""}`}
             >
               {opt.value === "burn_on_read" && <Trash2 size={14} />}
               {opt.label}
