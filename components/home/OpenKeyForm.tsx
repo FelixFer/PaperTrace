@@ -36,7 +36,7 @@ export function OpenKeyForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3" aria-busy={loading}>
       <h2 className="text-lg font-semibold text-ink">Open Existing Note</h2>
       <input
         type="text"
@@ -50,10 +50,10 @@ export function OpenKeyForm() {
         type="submit"
         disabled={loading}
         style={{ width: "100%" }}
-        className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-on-primary transition-colors hover:bg-primary-active disabled:opacity-50"
+        className="flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-on-primary transition-colors hover:bg-primary-active disabled:opacity-50"
       >
         <Search size={14} />
-        Open
+        {loading ? "Opening..." : "Open"}
       </button>
       {error && <p className="text-sm text-red-600">{error}</p>}
     </form>

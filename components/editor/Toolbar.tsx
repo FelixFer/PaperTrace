@@ -48,7 +48,7 @@ function ToolbarButton({
         onClick={onClick}
         disabled={disabled}
         aria-label={label}
-        className={`rounded-md p-1.5 transition-colors ${
+        className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
           isActive
             ? "bg-primary text-on-primary"
             : "text-ink-muted hover:bg-canvas-soft hover:text-ink"

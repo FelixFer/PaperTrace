@@ -39,7 +39,7 @@ export function ExportMenu({
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink transition-colors hover:bg-canvas-soft"
+        className="flex min-h-[44px] items-center gap-2 rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink transition-colors hover:bg-canvas-soft"
       >
         <Download size={14} />
         Export

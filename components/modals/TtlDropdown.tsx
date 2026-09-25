@@ -32,7 +32,7 @@ export function TtlDropdown({ currentMode, onUpdate }: TtlDropdownProps) {
       <button
         onClick={() => setOpen(!open)}
         disabled={loading}
-        className="flex items-center gap-2 rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink transition-colors hover:bg-canvas-soft disabled:opacity-50"
+        className="flex min-h-[44px] items-center gap-2 rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink transition-colors hover:bg-canvas-soft disabled:opacity-50"
       >
         <Clock size={14} className="text-ink-muted" />
         <span>

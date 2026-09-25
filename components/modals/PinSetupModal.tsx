@@ -37,7 +37,7 @@ export function PinSetupModal({ onClose, onConfirm }: PinSetupModalProps) {
             <Lock size={18} />
             <h3 className="font-semibold">Set PIN</h3>
           </div>
-          <button onClick={onClose} className="text-ink-faint hover:text-ink">
+          <button onClick={onClose} className="flex h-9 w-9 items-center justify-center text-ink-faint hover:text-ink">
             <X size={18} />
           </button>
         </div>

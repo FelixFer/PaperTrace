@@ -29,12 +29,13 @@ PaperTrace is designed to evoke a warm, tactile paper journal—like writing on 
 
 | Layer                         | Technology                       | Purpose                                                       |
 | ----------------------------- | -------------------------------- | ------------------------------------------------------------- |
-| **Framework**                 | Next.js 14 (App Router)          | React framework with integrated serverless API routes         |
-| **Styling**                   | Tailwind CSS v3                  | Utility-first CSS configured with custom paper tokens         |
-| **Editor**                    | Tiptap (ProseMirror)             | Headless WYSIWYG editor framework                             |
+| **Framework**                 | Next.js 16 (App Router)          | React 19 framework with serverless API routes                 |
+| **Styling**                   | Tailwind CSS v4                  | CSS-first utility framework with `@theme` design tokens       |
+| **Editor**                    | Tiptap v3 (ProseMirror)          | Headless WYSIWYG editor framework                             |
 | **Database**                  | Neon Serverless PostgreSQL       | Low-latency PostgreSQL DB hosted on serverless infrastructure |
-| **Authentication**            | Custom PIN (bcrypt)              | Hashed numeric PIN protection per note                        |
+| **Authentication**            | Custom PIN (bcryptjs)            | Hashed numeric PIN protection per note                        |
 | **Export & Client Utilities** | Native Blob API / `qrcode.react` | Client-side file generation and QR codes                      |
+| **Cron / TTL Pruning**        | Vercel Cron                      | Daily cleanup of expired notes                                |
 
 ---
 
@@ -42,7 +43,7 @@ PaperTrace is designed to evoke a warm, tactile paper journal—like writing on 
 
 ### 1. Prerequisites
 
-- Node.js `18.x` or higher
+- Node.js `22.x` or higher (24 LTS recommended)
 - npm, pnpm, or yarn
 - A free [Neon PostgreSQL](https://neon.tech) account
 
@@ -51,8 +52,9 @@ PaperTrace is designed to evoke a warm, tactile paper journal—like writing on 
 Create a `.env.local` file in the project root:
 
 ```env
-DATABASE_URL="postgresql://user:password@ep-cool-sample-123456.us-east-2.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL="postgresql://user:password@ep-cool-sample-123456-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+CRON_SECRET="a-long-random-secret-for-production-cron"
 ```
 
 ### 3. Database Initialization
@@ -82,7 +84,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 │   │   ├── v/[token]/page.tsx    # Read-only shared view
 │   │   └── e/[token]/page.tsx    # Editable shared view
 │   └── api/
-│       └── notes/                # Serverless API routes (CRUD, PIN, Share)
+│       ├── notes/                # Serverless API routes (CRUD, PIN, Share, Burn)
+│       └── cron/prune/route.ts   # Daily TTL pruning cron
 ├── components/
 │   ├── editor/                   # Tiptap toolbar, status bar, raw toggle
 │   ├── home/                     # Open key form, Create key form

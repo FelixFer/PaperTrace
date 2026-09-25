@@ -226,7 +226,7 @@ export function NoteEditor({ note, requiresPin = false }: NoteEditorProps) {
                 }
                 router.push("/");
               }}
-              className="flex shrink-0 items-center gap-1 text-sm text-ink-muted hover:text-ink"
+              className="flex h-9 shrink-0 items-center gap-1 rounded-lg px-2 text-sm text-ink-muted hover:bg-canvas-soft hover:text-ink"
             >
               <ArrowLeft size={14} />
               Home
@@ -250,7 +250,7 @@ export function NoteEditor({ note, requiresPin = false }: NoteEditorProps) {
 
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="rounded-lg p-2 text-ink-muted hover:bg-canvas-soft hover:text-ink"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted hover:bg-canvas-soft hover:text-ink"
               title="Settings"
             >
               <Settings size={16} />

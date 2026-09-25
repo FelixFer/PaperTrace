@@ -2,15 +2,16 @@
 
 ## 1. Stack Overview
 
-| Layer                  | Component             | Description                                                           |
-| ---------------------- | --------------------- | --------------------------------------------------------------------- |
-| **Frontend Framework** | Next.js 14 App Router | React-based fullstack framework with Edge API routes                  |
-| **WYSIWYG Engine**     | Tiptap (ProseMirror)  | Headless rich text editor engine                                      |
-| **Styling & Design**   | Tailwind CSS          | Utility-first framework configured with Notion Notebook tokens        |
-| **Database**           | Neon PostgreSQL       | Serverless PostgreSQL database with `@neondatabase/serverless` driver |
-| **Security**           | `bcryptjs`            | PIN hashing algorithm                                                 |
-| **Icons**              | Lucide React          | Clean, light vector icon library                                      |
-| **QR Code Engine**     | `qrcode.react`        | Client-side Canvas/SVG QR code generator                              |
+| Layer                  | Component                  | Description                                                           |
+| ---------------------- | -------------------------- | --------------------------------------------------------------------- |
+| **Frontend Framework** | Next.js 16 App Router      | React 19 fullstack framework with serverless API routes               |
+| **WYSIWYG Engine**     | Tiptap v3 (ProseMirror)    | Headless rich text editor engine                                      |
+| **Styling & Design**   | Tailwind CSS v4            | CSS-first utility framework with `@theme` design tokens               |
+| **Database**           | Neon PostgreSQL            | Serverless PostgreSQL database with `@neondatabase/serverless` driver |
+| **Security**           | `bcryptjs`                 | PIN hashing algorithm                                                 |
+| **Icons**              | Lucide React               | Clean, light vector icon library                                      |
+| **QR Code Engine**     | `qrcode.react`             | Client-side Canvas/SVG QR code generator                              |
+| **Cron / TTL Prune**   | Vercel Cron                | Daily `GET /api/cron/prune` removes expired notes                     |
 
 ---
 
@@ -19,23 +20,25 @@
 ### A. Tiptap Configuration with Metadata Extensions (`components/editor/TiptapEditor.tsx`)
 
 ```typescript
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import CharacterCount from '@tiptap/extension-character-count';
-import Markdown from 'tiptap-markdown';
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { CharacterCount } from "@tiptap/extensions";
+import { Markdown } from "@tiptap/markdown";
 
 export function TiptapEditor({ initialContent, onUpdate }) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       CharacterCount,
       Markdown,
     ],
     content: initialContent,
+    editable: true,
+    immediatelyRender: false, // Required under Next.js SSR
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const json = editor.getJSON();
-      const md = editor.storage.markdown.getMarkdown();
+      const md = editor.getMarkdown(); // Official v3 API
       onUpdate({ html, json, md });
     },
   });
@@ -104,37 +107,24 @@ export function downloadNoteFile(
 }
 ```
 
-### D. Burn-on-Read API Fetch Flow (`app/api/notes/[key]/route.ts`)
+### D. Burn-on-Read Self-Destruct Flow
+
+Burn-on-read no longer deletes the row on the initial `GET`. The note stays alive while the user is reading, and is destroyed when the session ends.
+
+`app/api/notes/[key]/burn/route.ts`:
 
 ```typescript
 import { sql } from "@/db";
 import { NextResponse } from "next/server";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { key: string } },
+export async function POST(
+  _req: Request,
+  { params }: { params: Promise<{ key: string }> },
 ) {
-  const { key } = params;
-
-  // 1. Fetch note record
-  const result = await sql`SELECT * FROM notes WHERE note_key = ${key} LIMIT 1`;
-  if (result.length === 0) {
-    return NextResponse.json({ error: "Note not found" }, { status: 404 });
-  }
-
-  const note = result[0];
-
-  // 2. Handle Expiration Check
-  if (note.expires_at && new Date(note.expires_at) < new Date()) {
-    await sql`DELETE FROM notes WHERE id = ${note.id}`;
-    return NextResponse.json({ error: "Note has expired" }, { status: 410 });
-  }
-
-  // 3. Handle Burn-on-Read Self-Destruct
-  if (note.ttl_mode === "burn_on_read") {
-    await sql`DELETE FROM notes WHERE id = ${note.id}`;
-  }
-
-  return NextResponse.json({ note });
+  const { key } = await params;
+  await sql`DELETE FROM notes WHERE note_key = ${key}`;
+  return NextResponse.json({ ok: true });
 }
 ```
+
+`components/editor/NoteEditor.tsx` fires the burn via `navigator.sendBeacon` (with a `fetch(..., { keepalive: true })` fallback) on `beforeunload`, `pagehide`, and `visibilitychange`, and also explicitly before navigating Home.

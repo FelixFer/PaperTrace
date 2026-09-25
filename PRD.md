@@ -58,7 +58,7 @@ Users who want friction-free, immediate note-taking across devices without under
 ### 3.4 TTL & Self-Destruct Mechanics
 
 - **FR-4.1:** Selectable dropdown in "Danger Zone" offering: `Never`, `1 Day`, `7 Days`, `30 Days`, and `Burn-on-Read`.
-- **FR-4.2:** In `Burn-on-Read` mode, the record is immediately deleted from Neon PostgreSQL after the initial full fetch response is served.
+- **FR-4.2:** In `Burn-on-Read` mode, the record is deleted from Neon PostgreSQL after the user closes or leaves the note page. While the note is open it remains editable and auto-saves normally; the deletion is triggered by page `beforeunload` / `pagehide` / `visibilitychange` events and by an explicit burn call before navigating Home.
 - **FR-4.3:** Scheduled pruning query executed via Cron endpoint deletes records where `expires_at < NOW()`.
 
 ### 3.5 Sharing & QR Code
