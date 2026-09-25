@@ -1,23 +1,27 @@
-"use client";
+import { OpenKeyForm } from "@/components/home/OpenKeyForm";
+import { CreateKeyForm } from "@/components/home/CreateKeyForm";
 
-import { TiptapEditor } from "@/components/editor/TiptapEditor";
-
-export default function Playground() {
+export default function Home() {
   return (
-    <div className="min-h-screen bg-canvas-soft p-8">
-      <div className="mx-auto max-w-3xl">
-        <h1 className="mb-2 text-2xl font-bold text-ink tracking-tight">
-          PaperTrace — Editor Playground
-        </h1>
-        <p className="mb-6 text-sm text-ink-faint">
-          Phase 3 smoke test. Edit below — toolbar, counts, and formatting should all work.
-        </p>
-        <TiptapEditor
-          initialContent="<h2>Welcome to PaperTrace</h2><p>Start typing to test the editor. The toolbar above lets you format text, and the status bar below tracks words and reading time.</p><blockquote><p>This is a blockquote — perfect for notes within notes.</p></blockquote><ul><li>Bullet list item one</li><li>Bullet list item two</li></ul>"
-          onUpdate={(data) => {
-            console.log("Editor update:", data);
-          }}
-        />
+    <div className="flex min-h-screen flex-col items-center justify-center overflow-x-hidden bg-canvas-soft px-4">
+      <div style={{ width: "100%", maxWidth: "420px" }}>
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-3xl font-bold text-ink tracking-tight">
+            PaperTrace
+          </h1>
+          <p className="text-sm text-ink-muted">
+            A lightweight, key-based note-taking app.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <div className="rounded-xl border border-hairline bg-surface p-5 shadow-elevation-1">
+            <OpenKeyForm />
+          </div>
+          <div className="rounded-xl border border-hairline bg-surface p-5 shadow-elevation-1">
+            <CreateKeyForm />
+          </div>
+        </div>
       </div>
     </div>
   );

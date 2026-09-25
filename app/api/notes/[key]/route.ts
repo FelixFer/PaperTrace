@@ -21,11 +21,6 @@ export async function GET(
     return NextResponse.json({ error: "Note has expired" }, { status: 410 });
   }
 
-  // Burn-on-read: delete after serving
-  if (note.ttl_mode === "burn_on_read") {
-    await sql`DELETE FROM notes WHERE id = ${note.id}`;
-  }
-
   // Strip content + secrets if PIN-protected and not verified
   if (note.is_protected) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

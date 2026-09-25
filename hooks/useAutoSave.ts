@@ -1,22 +1,31 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useLayoutEffect } from "react";
 
 export function useAutoSave(
   data: unknown,
   onSave: (data: unknown) => void,
   delay = 1500,
 ) {
-  const isFirstRender = useRef(true);
+  const dataRef = useRef(data);
+  const onSaveRef = useRef(onSave);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useLayoutEffect(() => {
+    dataRef.current = data;
+    onSaveRef.current = onSave;
+  });
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
     }
-
-    const handler = setTimeout(() => {
-      onSave(data);
+    timerRef.current = setTimeout(() => {
+      onSaveRef.current(dataRef.current);
     }, delay);
 
-    return () => clearTimeout(handler);
-  }, [data, delay, onSave]);
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [data, delay]);
 }

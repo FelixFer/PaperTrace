@@ -15,12 +15,14 @@ interface TiptapEditorProps {
     json: object;
     md: string;
   }) => void;
+  onClear?: () => void;
 }
 
 export function TiptapEditor({
   initialContent = "",
   editable = true,
   onUpdate,
+  onClear,
 }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -50,8 +52,12 @@ export function TiptapEditor({
 
   return (
     <div className="flex flex-col gap-3">
-      {editable && <Toolbar editor={editor} />}
-      <div className="rounded-lg border border-hairline bg-surface p-4 shadow-elevation-1">
+      {editable && <Toolbar editor={editor} onClear={onClear} />}
+      <div
+        style={{ minHeight: "300px" }}
+        className="rounded-lg bg-surface p-4 shadow-elevation-1"
+        onClick={() => editor.commands.focus()}
+      >
         <EditorContent
           editor={editor}
           className="prose max-w-none min-h-[300px] focus:outline-none"

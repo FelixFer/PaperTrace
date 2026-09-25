@@ -79,8 +79,11 @@
 
 /* ── Base Styles ─────────────────────────────────── */
 
+html,
 body {
   margin: 0;
+  max-width: 100vw;
+  overflow-x: hidden;
   background-color: var(--color-canvas-soft);
   color: var(--color-ink);
   font-family: var(--font-sans);
@@ -122,4 +125,18 @@ body {
 }
 .prose hr {
   border-color: var(--color-hairline);
+}
+
+/* ── Editor Caret ─────────────────────────────────── */
+
+.ProseMirror {
+  caret-color: var(--color-primary);
+  outline: none;
+  min-height: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.ProseMirror-focused {
+  outline: none;
 }

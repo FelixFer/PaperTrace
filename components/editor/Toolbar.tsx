@@ -16,10 +16,12 @@ import {
   Minus,
   Undo2,
   Redo2,
+  Trash2,
 } from "lucide-react";
 
 interface ToolbarProps {
   editor: Editor;
+  onClear?: () => void;
 }
 
 interface ToolbarButtonProps {
@@ -27,7 +29,8 @@ interface ToolbarButtonProps {
   isActive?: boolean;
   disabled?: boolean;
   children: React.ReactNode;
-  title: string;
+  label: string;
+  shortcut?: string;
 }
 
 function ToolbarButton({
@@ -35,22 +38,31 @@ function ToolbarButton({
   isActive = false,
   disabled = false,
   children,
-  title,
+  label,
+  shortcut,
 }: ToolbarButtonProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      className={`rounded-md p-1.5 transition-colors ${
-        isActive
-          ? "bg-primary text-on-primary"
-          : "text-ink-muted hover:bg-canvas-soft hover:text-ink"
-      } ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
-    >
-      {children}
-    </button>
+    <div className="group relative">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={label}
+        className={`rounded-md p-1.5 transition-colors ${
+          isActive
+            ? "bg-primary text-on-primary"
+            : "text-ink-muted hover:bg-canvas-soft hover:text-ink"
+        } ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+      >
+        {children}
+      </button>
+      <span className="pointer-events-none absolute left-1/2 top-full z-30 mt-2 max-w-[200px] -translate-x-1/2 rounded-md bg-ink px-2.5 py-1 text-center text-xs font-medium text-on-primary opacity-0 shadow-elevation-1 transition-opacity duration-150 group-hover:opacity-100">
+        {label}
+        {shortcut && (
+          <span className="ml-1.5 text-ink-faint">{shortcut}</span>
+        )}
+      </span>
+    </div>
   );
 }
 
@@ -58,8 +70,16 @@ function Separator() {
   return <div className="w-px h-5 bg-hairline mx-1" />;
 }
 
-export function Toolbar({ editor }: ToolbarProps) {
+export function Toolbar({ editor, onClear }: ToolbarProps) {
   const iconSize = 16;
+
+  function handleClear() {
+    if (!onClear) return;
+    if (window.confirm("Clear all content? This cannot be undone.")) {
+      editor.chain().focus().clearContent().run();
+      onClear();
+    }
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-1 rounded-lg border border-hairline bg-surface px-3 py-2 shadow-elevation-0">
@@ -67,28 +87,32 @@ export function Toolbar({ editor }: ToolbarProps) {
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBold().run()}
         isActive={editor.isActive("bold")}
-        title="Bold"
+        label="Bold"
+        shortcut="Ctrl+B"
       >
         <Bold size={iconSize} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
         isActive={editor.isActive("italic")}
-        title="Italic"
+        label="Italic"
+        shortcut="Ctrl+I"
       >
         <Italic size={iconSize} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleStrike().run()}
         isActive={editor.isActive("strike")}
-        title="Strikethrough"
+        label="Strikethrough"
+        shortcut="Ctrl+Shift+X"
       >
         <Strikethrough size={iconSize} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleCode().run()}
         isActive={editor.isActive("code")}
-        title="Inline Code"
+        label="Inline Code"
+        shortcut="Ctrl+E"
       >
         <Code size={iconSize} />
       </ToolbarButton>
@@ -101,7 +125,8 @@ export function Toolbar({ editor }: ToolbarProps) {
           editor.chain().focus().toggleHeading({ level: 1 }).run()
         }
         isActive={editor.isActive("heading", { level: 1 })}
-        title="Heading 1"
+        label="Heading 1"
+        shortcut="Ctrl+Alt+1"
       >
         <Heading1 size={iconSize} />
       </ToolbarButton>
@@ -110,7 +135,8 @@ export function Toolbar({ editor }: ToolbarProps) {
           editor.chain().focus().toggleHeading({ level: 2 }).run()
         }
         isActive={editor.isActive("heading", { level: 2 })}
-        title="Heading 2"
+        label="Heading 2"
+        shortcut="Ctrl+Alt+2"
       >
         <Heading2 size={iconSize} />
       </ToolbarButton>
@@ -119,7 +145,8 @@ export function Toolbar({ editor }: ToolbarProps) {
           editor.chain().focus().toggleHeading({ level: 3 }).run()
         }
         isActive={editor.isActive("heading", { level: 3 })}
-        title="Heading 3"
+        label="Heading 3"
+        shortcut="Ctrl+Alt+3"
       >
         <Heading3 size={iconSize} />
       </ToolbarButton>
@@ -130,14 +157,16 @@ export function Toolbar({ editor }: ToolbarProps) {
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         isActive={editor.isActive("bulletList")}
-        title="Bullet List"
+        label="Bullet List"
+        shortcut="Ctrl+Shift+8"
       >
         <List size={iconSize} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         isActive={editor.isActive("orderedList")}
-        title="Ordered List"
+        label="Ordered List"
+        shortcut="Ctrl+Shift+7"
       >
         <ListOrdered size={iconSize} />
       </ToolbarButton>
@@ -148,20 +177,22 @@ export function Toolbar({ editor }: ToolbarProps) {
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         isActive={editor.isActive("blockquote")}
-        title="Blockquote"
+        label="Blockquote"
+        shortcut="Ctrl+Shift+B"
       >
         <Quote size={iconSize} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         isActive={editor.isActive("codeBlock")}
-        title="Code Block"
+        label="Code Block"
+        shortcut="Ctrl+Alt+C"
       >
         <CodeSquare size={iconSize} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        title="Horizontal Rule"
+        label="Horizontal Rule"
       >
         <Minus size={iconSize} />
       </ToolbarButton>
@@ -172,16 +203,27 @@ export function Toolbar({ editor }: ToolbarProps) {
       <ToolbarButton
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().undo()}
-        title="Undo"
+        label="Undo"
+        shortcut="Ctrl+Z"
       >
         <Undo2 size={iconSize} />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().redo()}
-        title="Redo"
+        label="Redo"
+        shortcut="Ctrl+Shift+Z"
       >
         <Redo2 size={iconSize} />
+      </ToolbarButton>
+
+      {/* Clear */}
+      <Separator />
+      <ToolbarButton
+        onClick={handleClear}
+        label="Clear Document"
+      >
+        <Trash2 size={iconSize} className="text-red-500" />
       </ToolbarButton>
     </div>
   );
